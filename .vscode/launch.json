@@ -16,6 +16,18 @@
             "preLaunchTask": "LanzarBrowserSync",
             "postDebugTask": "PararBrowserSync"
             
+        },
+         {
+            "type": "chrome",
+            "runtimeExecutable": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+            "port": 9222,
+            "request": "launch",
+            "name": "BrowserSync Debug",
+            "url": "http://localhost:3000/test",
+            "webRoot": "${workspaceFolder}/",
+            "preLaunchTask": "debugBrowserSync",
+            "postDebugTask": "PararBrowserSync"
+            
         }
     ]
 }
