@@ -1,0 +1,258 @@
+:host {
+    display: block;
+    min-width: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+section {
+    border-top: 1px solid var(--borde);
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+h3 {
+    margin: .4rem 0 1rem;
+    font: 500 1.5rem Georgia, serif;
+    color: var(--cafe);
+}
+
+h4 {
+    margin: 1.25rem 0 .65rem;
+    font-size: .95rem;
+}
+
+button,
+input,
+select {
+    font: inherit;
+    min-height: 2.75rem;
+    border-radius: .65rem;
+}
+
+button {
+    padding: .7rem 1rem;
+    background: var(--cafe);
+    color: var(--crema);
+    border: 1px solid var(--cafe);
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--cafe-suave);
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+input:not([type=radio]),
+select {
+    display: block;
+    width: 100%;
+    padding: .7rem;
+    background: var(--campo);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+}
+
+label {
+    display: block;
+    margin: 0 0 .5rem;
+    font-size: .9rem;
+}
+
+.numero {
+    overflow-wrap: anywhere;
+    color: var(--cafe-suave);
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.totales {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .6rem;
+    margin: 1rem 0;
+}
+
+.totales div {
+    padding: .85rem;
+    background: var(--arena);
+    border-radius: .75rem;
+}
+
+dt {
+    font-size: .8rem;
+    color: var(--cafe-suave);
+}
+
+dd {
+    margin: .4rem 0 0;
+    font-size: 1.25rem;
+    font-weight: 650;
+    color: var(--cafe);
+}
+
+fieldset {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border: 0;
+    padding: 0;
+    margin: 1.2rem 0;
+}
+
+legend {
+    margin-bottom: .7rem;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+fieldset label {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: .4rem .8rem;
+    border: 1px solid var(--borde);
+    border-radius: .65rem;
+    cursor: pointer;
+}
+
+fieldset label:has(input:checked) {
+    background: var(--arena);
+    border-color: var(--cafe-suave);
+}
+
+input[type=radio] {
+    min-height: 0;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    accent-color: var(--cafe);
+}
+
+.campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: .85rem;
+}
+
+small {
+    display: block;
+    color: var(--secundario);
+    line-height: 1.5;
+    margin: .65rem 0;
+}
+
+.abonar {
+    width: 100%;
+    margin-top: .5rem;
+}
+
+#monto[aria-invalid=true] {
+    border-color: var(--cafe-suave);
+    outline: 1px solid var(--cafe-suave);
+}
+
+.historial {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.historial li {
+    padding: .65rem 0;
+    border-bottom: 1px solid var(--borde);
+    font-size: .9rem;
+    overflow-wrap: anywhere;
+}
+
+.acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: 1rem;
+}
+
+.secundario {
+    color: var(--cafe);
+    background: var(--superficie);
+    border-color: var(--borde);
+}
+
+.secundario:hover {
+    background: var(--arena);
+}
+
+dialog {
+    width: min(30rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    overflow: auto;
+    border: 1px solid var(--borde);
+    border-radius: 1rem;
+    background: var(--superficie);
+    color: var(--cafe);
+    padding: 1.5rem;
+}
+
+dialog::backdrop {
+    background: rgb(57 43 37 / .45);
+}
+
+dialog p {
+    line-height: 1.5;
+}
+
+textarea {
+    width: 100%;
+    resize: vertical;
+    padding: .75rem;
+    font: inherit;
+    color: var(--cafe);
+    background: var(--campo);
+    border: 1px solid var(--borde);
+    border-radius: .65rem;
+}
+
+textarea:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+.ayuda-anulacion {
+    color: var(--cafe-suave);
+    font-size: .9rem;
+}
+
+@media(max-width:420px) {
+    .totales {
+        grid-template-columns: 1fr;
+    }
+
+    .totales div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+    }
+
+    dd {
+        margin: 0;
+    }
+}

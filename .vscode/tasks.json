@@ -1,20 +1,23 @@
-
 {
     "version": "2.0.0",
     "tasks": [
         {
             "label": "LanzarBrowserSync",
             "type": "shell",
-            "command": "browser-sync.cmd start --server src -f \"**/*\" ./src/ --no-open",
-            "presentation": {"reveal": "silent"},
+            "command": "browser-sync.cmd start --server src --no-open --no-snippet --no-notify --no-ghost-mode --no-reload-on-restart",
+            "presentation": {
+                "reveal": "silent"
+            },
             "isBackground": true,
             "problemMatcher": []
         },
-         {
+        {
             "label": "debugBrowserSync",
             "type": "shell",
-            "command": "browser-sync.cmd start --server ./ -f \"**/*\" ./ --no-open",
-            "presentation": {"reveal": "silent"},
+            "command": "browser-sync.cmd start --server src --serveStatic ./ --port 3000 --no-open --no-snippet --no-notify --no-ghost-mode --no-reload-on-restart",
+            "presentation": {
+                "reveal": "silent"
+            },
             "isBackground": true,
             "problemMatcher": []
         },
@@ -22,7 +25,7 @@
             "label": "PararBrowserSync",
             "type": "shell",
             "command": "echo ${input:terminate}",
-            "problemMatcher":[]
+            "problemMatcher": []
         }
     ],
     "inputs": [

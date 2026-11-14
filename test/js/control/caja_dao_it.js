@@ -1,29 +1,26 @@
 import sinon from "../../lib/sinon/sinon-esm.js";
-import * as chai from "../../lib/chai/index.js";
+import { expect } from "../../lib/chai/index.js";
 import CajaDao from "../../../src/js/control/caja_dao.js";
 import DefaultResponse from "../../../src/js/entity/default_response.js";
+import Caja from "../../../src/js/entity/caja.js";
 mocha.setup("bdd");
-describe("CajaDao", function(){
-    var cut;
+describe("CajaDao: integración con la API", function(){
     let peticion;
     beforeEach(() => { peticion = sinon.spy(window, "fetch"); });
     afterEach(() => peticion.restore());
-    it("Should have an instance to test", function(){
-        cut= new CajaDao();
-        chai.assert.isDefined(cut);
-        chai.expect(cut).to.be.an.instanceOf(CajaDao);
-    });
-
-    it("findRange should return a DefaultResponse with the correct data",function(done){
-        cut.findRange(0,10).then(resp =>{
-            sinon.assert.calledOnceWithExactly(peticion, cut.URL + "?min=0&max=10", { method: "GET" });
-            chai.expect(resp).to.be.an.instanceOf(DefaultResponse);
-            chai.expect(resp.datos).to.be.an("array").that.has.lengthOf(2);
-            chai.expect(resp.totalDatos).to.equal("2");
-            done();
-        }).catch(err=>{
-            done(err);
-        });
+    it("recupera la página real, su total y los campos necesarios para seleccionar una caja", async function(){
+        const dao = new CajaDao();
+        const pagina = await dao.findRange(0, 10);
+        sinon.assert.calledOnceWithExactly(peticion, dao.URL + "?min=0&max=10", { method: "GET" });
+        expect(pagina).to.be.instanceOf(DefaultResponse);
+        expect(pagina.totalDatos).to.match(/^\d+$/);
+        expect(pagina.datos).to.have.lengthOf(Math.min(10, Number(pagina.totalDatos)));
+        for (const caja of pagina.datos) {
+            expect(caja).to.be.instanceOf(Caja);
+            expect(caja.idCaja).to.be.a("string").and.not.be.empty;
+            expect(caja.nombre).to.be.a("string");
+            expect(caja.activo).to.be.a("boolean");
+        }
     });
 });
 

@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../../../../resources/estilos/producto_detalle.css">
+<tarjeta-simple>
+    <h3 slot="titulo"></h3>
+    <button class="imagen-producto" type="button" slot="contenido" aria-haspopup="dialog"><img alt=""></button>
+    <strong slot="pie"></strong>
+    <button class="elegir" type="button" slot="pie" aria-haspopup="dialog">Elegir</button>
+</tarjeta-simple>
+<dialog aria-labelledby="titulo-detalle">
+    <button class="cerrar" type="button" aria-label="Cerrar detalle">×</button>
+    <img class="imagen-detalle" alt="">
+    <div class="detalle">
+        <h2 id="titulo-detalle"></h2>
+        <p class="descripcion"></p>
+        <p class="precio"></p>
+        <ul class="caracteristicas-fijas" aria-label="Características del producto" hidden></ul>
+        <div class="grupos-caracteristicas"></div>
+        <div class="seleccion">
+            <div><span class="etiqueta">Cantidad</span><div class="cantidad" role="group" aria-label="Cantidad de unidades">
+                <button id="menos" type="button" aria-label="Reducir cantidad">−</button>
+                <output aria-live="polite" aria-label="Cantidad">1</output>
+                <button id="mas" type="button" aria-label="Aumentar cantidad">+</button>
+            </div></div>
+            <button id="agregar" type="button"></button>
+        </div>
+    </div>
+</dialog>
+<template id="caracteristica-fija"><li></li></template>
+<template id="grupo-caracteristica">
+    <fieldset class="presentaciones">
+        <legend><span></span> <small>Elige una opción</small></legend>
+        <div class="opciones"></div>
+    </fieldset>
+</template>
+<template id="opcion-presentacion">
+    <label>
+        <input type="radio" name="presentacion" required>
+        <span></span>
+        <strong></strong>
+    </label>
+</template>

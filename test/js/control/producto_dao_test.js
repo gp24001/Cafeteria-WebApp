@@ -1,3 +1,4 @@
+import ProductoTipoProductoDao from "../../../src/js/control/producto_tipo_producto_dao.js";
 import { expect } from "../../lib/chai/index.js";
 import sinon from "../../lib/sinon/sinon-esm.js";
 import DefaultResponse from "../../../src/js/entity/default_response.js";
@@ -36,6 +37,21 @@ suite("ProductoDao", function () {
         expect(fallo).to.be.instanceOf(DefaultError);
         expect(fallo.error).to.equal(respuesta);
         expect(fallo.mensaje).to.equal("Registro ausente");
+    });
+
+    test("lee únicamente asociaciones activas de productos activos de la categoría elegida", async function () {
+        const dao = new ProductoDao();
+        sinon.stub(dao, "listarTodos").resolves(["Agua", "Pan", "Té", "Vino"].map(nombre => ({
+            nombre, idProducto: nombre, activo: nombre !== "Vino"
+        })));
+        const relaciones = sinon.stub(ProductoTipoProductoDao.prototype, "listarTodos").callsFake(function () {
+            const nombre = decodeURIComponent(this.URL.split("/").at(-2));
+            return Promise.resolve([{ activo: nombre !== "Té", idTipoProducto: {
+                idTipoProducto: nombre === "Pan" ? "comida" : "bebidas"
+            } }]);
+        });
+        expect((await dao.productosDeCategoria("bebidas")).map(p => p.nombre)).to.deep.equal(["Agua"]);
+        sinon.assert.callCount(relaciones, 3);
     });
 });
 mocha.run();

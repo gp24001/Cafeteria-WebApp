@@ -1,10 +1,16 @@
+import Factura from "../entity/factura.js";
 import DefaultDao from "./default_dao.js";
+
+/** Identifica anulaciones de órdenes completas, conservadas en el historial original. */
+export function esOrdenAnulada(factura) {
+    return factura.estado === "ANULADA" && factura.observaciones?.includes("Anulación: Orden anulada: ");
+}
 
 /** Acceso al recurso REST Factura. */
 export default class FacturaDao extends DefaultDao {
     /** Configura la ruta de Factura. */
     constructor() {
-        super();
+        super(Factura);
         this.URL += "factura";
     }
 
@@ -28,6 +34,14 @@ export default class FacturaDao extends DefaultDao {
      * @returns {Promise<object>} Totales devueltos por la API.
      */
     totales(idFactura) {
-        return this.solicitarJson(`${this.URL}/${encodeURIComponent(idFactura)}/totales`);
+        return this.solicitarJson(`${this.URL}/${encodeURIComponent(idFactura)}/totales`, undefined, Object);
+    }
+
+    /** Anula mediante el endpoint existente, que exige motivo y ausencia de pagos. */
+    anular(idFactura, motivo) {
+        return this.solicitarJson(`${this.URL}/${encodeURIComponent(idFactura)}/anular`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ motivo })
+        });
     }
 }

@@ -1,0 +1,12 @@
+<link rel="stylesheet" href="../../../../resources/estilos/busqueda_filtro.css">
+<div class="cabecera">
+    <slot name="titulo"></slot>
+    <button type="button" aria-expanded="false" aria-controls="filtro">
+        <img src="../../../../resources/imagenes/iconos/buscar.png" alt="">
+        <span>Buscar</span>
+    </button>
+</div>
+<div id="filtro" hidden>
+    <label for="entrada"></label>
+    <input id="entrada" type="search" autocomplete="off">
+</div>

@@ -1,0 +1,25 @@
+:root {
+    color-scheme: light;
+    --cafe: #392b25;
+    --cafe-suave: #735848;
+    --crema: #ece9e3;
+    --arena: #e2dbd0;
+    --superficie: #f2efec;
+    --campo: #f2f2f2;
+    --panel: #e7e2db;
+    --borde: #d9d2c7;
+    --texto: #302c27;
+    --secundario: #726c62;
+    --acento: #536244;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: var(--texto);
+    background: var(--crema);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}

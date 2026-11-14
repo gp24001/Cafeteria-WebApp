@@ -1,0 +1,260 @@
+:host {
+    display: block;
+    min-width: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+:host([solo-lectura]) .acciones-linea button {
+    display: none;
+}
+
+:host([sin-total]) .total {
+    display: none;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+dialog {
+    width: min(29rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    padding: 1.7rem;
+    border: 1px solid var(--borde, #e4ddd1);
+    border-radius: 1.4rem;
+    color: var(--texto, #302c27);
+    background: var(--superficie, #f2efec);
+    box-shadow: 0 24px 80px #241c1840;
+}
+
+dialog::backdrop {
+    background: #241c1899;
+    backdrop-filter: blur(3px);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+    padding: .65rem .9rem;
+    border: 1px solid var(--cafe, #392b25);
+    border-radius: .65rem;
+    color: var(--crema, #f8f5ef);
+    background: var(--cafe, #392b25);
+}
+
+button:hover {
+    background: var(--cafe-suave, #735848);
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--acento, #536244);
+    outline-offset: 3px;
+}
+
+#abrir {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border-color: var(--borde, #e4ddd1);
+    background: var(--arena, #eee7db);
+    color: var(--cafe, #392b25);
+    font-size: .9rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#abrir img,
+.eliminar img {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+h2 {
+    margin: 0 0 1.3rem;
+    font: 500 1.8rem Georgia, serif;
+}
+
+section h2 {
+    margin: .3rem 0 .8rem;
+    font: 600 .85rem "Segoe UI", sans-serif;
+    color: var(--secundario, #726c62);
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .7rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--borde, #e4ddd1);
+}
+
+.datos-linea {
+    display: grid;
+    gap: .35rem;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+.datos-linea small {
+    color: var(--secundario, #726c62);
+    font-size: .8rem;
+    font-weight: 400;
+}
+
+.acciones-linea {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.eliminar {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    border-color: var(--borde, #e4ddd1);
+    background: transparent;
+    color: var(--cafe-suave, #735848);
+}
+
+.eliminar:hover {
+    background: var(--arena, #eee7db);
+    color: var(--cafe, #392b25);
+}
+
+.unidades {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    border: 1px solid var(--borde, #e4ddd1);
+    border-radius: .6rem;
+    overflow: hidden;
+}
+
+.unidades button {
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    padding: .2rem;
+    border: 0;
+    border-radius: 0;
+    color: var(--cafe, #392b25);
+    background: var(--arena, #eee7db);
+    font-size: 1.2rem;
+}
+
+.unidades span {
+    min-width: 2rem;
+    padding: .2rem;
+    text-align: center;
+    font-size: .9rem;
+}
+
+.total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 1.15rem;
+    margin: 1.4rem 0;
+}
+
+form {
+    border-top: 1px solid var(--borde, #e4ddd1);
+    padding-top: .4rem;
+}
+
+label {
+    display: grid;
+    gap: .6rem;
+    margin: 1rem 0;
+    font-weight: 600;
+    font-size: .9rem;
+}
+
+input {
+    width: 100%;
+    min-width: 0;
+    padding: .8rem;
+    border: 1px solid var(--borde, #e4ddd1);
+    border-radius: .65rem;
+    background: var(--campo, #f2f2f2);
+    color: var(--texto, #302c27);
+}
+
+#pedir {
+    width: 100%;
+    font-weight: 600;
+    padding: .85rem;
+}
+
+#revision p {
+    margin: .5rem 0 .8rem;
+    font-weight: 600;
+}
+
+.acciones-pedido {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.acciones-pedido button {
+    flex: 1 1 9rem;
+}
+
+#editar {
+    background: var(--arena, #eee7db);
+    color: var(--cafe, #392b25);
+    border-color: var(--borde, #e4ddd1);
+}
+
+#cerrar {
+    position: absolute;
+    top: .7rem;
+    right: .7rem;
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    border-color: var(--borde, #e4ddd1);
+    background: transparent;
+    color: var(--cafe, #392b25);
+    font-size: 1.5rem;
+}
+
+dialog>#titulo {
+    padding-right: 2rem;
+}
+
+[role=status] {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    color: var(--cafe, #392b25);
+}
+
+[role=status]:empty {
+    display: none;
+}

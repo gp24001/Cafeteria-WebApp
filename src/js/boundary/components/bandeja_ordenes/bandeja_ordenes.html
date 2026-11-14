@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../resources/estilos/empleados.css">
+<section aria-label="Recepción de órdenes">
+   
+    <p class="estado" role="status" aria-live="polite"></p>
+    <div class="recepcion">
+        <section class="cola-ordenes" aria-labelledby="titulo-cola">
+            <h2 id="titulo-cola">Ordenes pendientes</h2>
+            <div class="lista-ordenes" role="group" aria-label="Órdenes por preparar" tabindex="0"></div>
+        </section>
+        <section class="detalle-orden" aria-labelledby="titulo-orden" aria-busy="false">
+            <span class="eyebrow">Detalle del pedido</span>
+            <h3 id="titulo-orden">Selecciona una orden</h3>
+            <p class="cliente"></p>
+            <p class="fecha"></p>
+            <p class="estado-detalle" role="status" aria-live="polite"></p>
+            <div class="acciones-preparacion" hidden><span class="estado-preparacion"></span><button
+                    class="preparar secundario" type="button">Marcar en preparación</button></div>
+            <items-preparacion hidden></items-preparacion>
+            <details class="resumen-lectura" hidden>
+                <summary>Ver resumen y total</summary>
+                <resumen-orden solo-lectura omitir-porcion-unitaria hidden><span slot="titulo">Productos de la
+                        orden</span></resumen-orden>
+            </details>
+            <p class="total-pago" hidden><span>Total de la orden</span><strong></strong></p>
+            <button class="todos-listos secundario" type="button" hidden disabled>Marcar todo como listo</button>
+            <button class="despachar" type="button" hidden disabled>Despachar orden</button>
+            <p class="ayuda-despacho" hidden>Marca todos los ítems como listos para enviar la orden a facturación.</p>
+        </section>
+    </div>
+</section>
+<template id="fila-orden"><strong></strong><span></span><small></small><span class="estado-orden"></span></template>

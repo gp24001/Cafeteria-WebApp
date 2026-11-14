@@ -1,0 +1,125 @@
+:host {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 4rem;
+    padding: .6rem 1.25rem;
+    background: var(--arena);
+    border-bottom: 1px solid var(--borde);
+}
+
+.marca {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    flex-shrink: 0;
+    color: var(--cafe);
+    font: 500 1.85rem Georgia, serif;
+    letter-spacing: -.05em;
+}
+
+.marca img {
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: .3rem;
+    object-fit: cover;
+}
+
+.acciones {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: .65rem;
+}
+
+.abrir-menu {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.65rem;
+    height: 2.65rem;
+    padding: 0;
+    background: transparent;
+}
+
+.abrir-menu img {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+}
+
+a {
+    padding: .6rem .4rem;
+    color: var(--cafe);
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    text-underline-offset: .3rem;
+}
+
+a:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+.usuario {
+    color: var(--cafe);
+    font-size: .85rem;
+    overflow-wrap: anywhere;
+}
+
+button {
+    padding: .6rem .8rem;
+    border: 1px solid var(--borde);
+    border-radius: .65rem;
+    color: var(--cafe);
+    background: var(--arena);
+    font: inherit;
+    font-size: .85rem;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--crema);
+}
+
+button:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media(max-width:540px) {
+    :host {
+        gap: .5rem;
+        padding: .5rem .85rem;
+    }
+
+    .marca {
+        font-size: 1.6rem;
+    }
+
+    .marca img {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .acciones {
+        gap: .35rem;
+    }
+
+    .usuario {
+        font-size: .8rem;
+    }
+}

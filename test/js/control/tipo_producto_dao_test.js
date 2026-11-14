@@ -29,6 +29,31 @@ suite("TipoProductoDao", function () {
         expect(peticion.firstCall.args[0]).to.equal(url + "/" + id);
     });
 
+    test("findRange conserva la causa y el mensaje de un fallo de conexión", async function () {
+        const causa = new TypeError("Sin conexión"); peticion.rejects(causa);
+        const fallo = await dao.findRange(0, 1).catch(error => error);
+        expect(fallo).to.be.instanceOf(DefaultError);
+        expect(fallo.error).to.equal(causa);
+        expect(fallo.mensaje).to.equal("Error al acceder al repositorio");
+    });
+
+    test("findRange exige HTTP 200 y conserva la respuesta rechazada", async function () {
+        for (const status of [204, 500]) {
+            const respuesta = new Response(null, { status }); peticion.resolves(respuesta);
+            const fallo = await dao.findRange(0, 1).catch(error => error);
+            expect(fallo.error).to.equal(respuesta);
+            expect(fallo.mensaje).to.equal("Error al obtener los datos: " + status);
+        }
+    });
+
+    test("findRange distingue JSON inválido de un fallo de conexión", async function () {
+        peticion.resolves(new Response("JSON inválido"));
+        const fallo = await dao.findRange(0, 1).catch(error => error);
+        expect(fallo).to.be.instanceOf(DefaultError);
+        expect(fallo.error).to.be.instanceOf(SyntaxError);
+        expect(fallo.mensaje).to.equal("Error al procesar los datos de respuesta");
+    });
+
     test("findById conserva el error del recurso", async function () {
         const respuesta = new Response(null, { status: 404, headers: { "App-Error": "Registro ausente" } });
         peticion.resolves(respuesta);

@@ -1,0 +1,340 @@
+:host {
+    display: block;
+    min-width: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+h2,
+h3 {
+    color: var(--cafe, #392b25);
+    font-family: Georgia, serif;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin: .6rem 0;
+}
+
+h3 {
+    font-size: 1.55rem;
+    margin: .6rem 0;
+}
+
+p {
+    color: var(--secundario, #726c62);
+    line-height: 1.6;
+}
+
+.eyebrow {
+    color: var(--cafe-suave, #735848);
+    font-size: .75rem;
+    font-weight: 650;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    min-height: 2.8rem;
+    padding: .7rem 1rem;
+    border: 1px solid var(--cafe, #392b25);
+    border-radius: .75rem;
+    background: var(--cafe, #392b25);
+    color: var(--crema, #f8f5ef);
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--cafe-suave, #735848);
+}
+
+button:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+    outline: 3px solid var(--acento, #536244);
+    outline-offset: 3px;
+}
+
+.ingreso {
+    width: 100%;
+    max-width: 28rem;
+    margin: clamp(0rem, 3vw, 2rem) auto;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    border: 1px solid var(--borde, #e4ddd1);
+    border-radius: 1.4rem;
+    background: var(--superficie, #f2efec);
+    box-shadow: 0 10px 35px #392b2507;
+}
+
+form {
+    display: grid;
+    margin-top: 1.5rem;
+}
+
+label {
+    margin: 1rem 0 .55rem;
+    color: var(--cafe, #392b25);
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    min-width: 0;
+    min-height: 3rem;
+    padding: .75rem;
+    border: 1px solid var(--borde, #e4ddd1);
+    border-radius: .75rem;
+    color: var(--texto, #302c27);
+    background: var(--campo, #f2f2f2);
+}
+
+small {
+    color: var(--secundario, #726c62);
+    line-height: 1.5;
+}
+
+#ayuda {
+    margin-top: .5rem;
+}
+
+.volver-cliente {
+    display: block;
+    width: fit-content;
+    margin: 1.25rem auto 0;
+    color: var(--cafe-suave, #735848);
+    font-size: .9rem;
+    text-underline-offset: .25rem;
+}
+
+.estado {
+    color: var(--cafe-suave, #735848);
+    overflow-wrap: anywhere;
+}
+
+.estado:empty {
+    display: none;
+}
+
+.estado-detalle {
+    min-height: 1.5rem;
+    line-height: 1.5rem;
+    margin: .5rem 0;
+}
+
+.cabecera-ordenes {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.cabecera-ordenes+.estado {
+    margin: .75rem 0;
+}
+
+.cabecera-ordenes p {
+    margin: .5rem 0;
+}
+
+.secundario {
+    background: var(--superficie, #f2efec);
+    color: var(--cafe, #392b25);
+    border-color: var(--borde, #e4ddd1);
+}
+
+.secundario:hover {
+    background: var(--arena, #eee7db);
+}
+
+.recepcion {
+    display: grid;
+    grid-template-columns: clamp(15rem, 25vw, 20rem) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+    margin: 1rem 0 0;
+}
+
+.cola-ordenes {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--borde, #e4ddd1);
+    border-radius: 1rem;
+    background: var(--panel, #e7e2db);
+}
+
+.cola-ordenes h2 {
+    margin: 0 0 .85rem;
+    font-size: 1.35rem;
+}
+
+.lista-ordenes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .6rem;
+    max-height: min(70rem, max(15rem, calc(100dvh - 23rem)));
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+    padding: .2rem;
+    scrollbar-color: var(--cafe-suave, #735848) transparent;
+    scrollbar-width: thin;
+}
+
+.lista-ordenes:focus-visible {
+    outline: 3px solid var(--acento, #536244);
+    outline-offset: 3px;
+}
+
+.orden {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .4rem .5rem;
+    width: 100%;
+    padding: .85rem;
+    text-align: left;
+    background: var(--superficie, #f2efec);
+    color: var(--texto, #302c27);
+    border-color: var(--borde, #e4ddd1);
+    border-radius: .85rem;
+    overflow-wrap: anywhere;
+}
+
+.orden>span:not(.estado-orden),
+.orden>small {
+    grid-column: 1 / -1;
+}
+
+.orden>.estado-orden {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    font-size: .7rem;
+}
+
+.orden strong {
+    color: var(--cafe, #392b25);
+}
+
+.orden:hover,
+.orden[aria-pressed=true] {
+    background: var(--arena, #eee7db);
+    border-color: var(--cafe-suave, #735848);
+}
+
+.orden[aria-pressed=true] {
+    box-shadow: inset 3px 0 var(--cafe-suave, #735848);
+}
+
+.detalle-orden {
+    min-width: 0;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid var(--borde, #e4ddd1);
+    border-radius: 1.2rem;
+    background: var(--superficie, #f2efec);
+}
+
+.cliente {
+    margin-bottom: .3rem;
+    color: var(--texto, #302c27);
+    overflow-wrap: anywhere;
+}
+
+.fecha {
+    margin: .3rem 0 .8rem;
+    font-size: .85rem;
+}
+
+.acciones-preparacion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin: 1rem 0;
+}
+
+.estado-preparacion,
+.estado-orden {
+    width: fit-content;
+    padding: .3rem .65rem;
+    border-radius: 2rem;
+    background: var(--arena, #eee7db);
+    color: var(--cafe-suave, #735848);
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.resumen-lectura {
+    margin: .5rem 0;
+}
+
+.resumen-lectura summary {
+    padding: .7rem 0;
+    color: var(--cafe-suave, #735848);
+    cursor: pointer;
+}
+
+.resumen-lectura summary:focus-visible {
+    outline: 3px solid var(--acento, #536244);
+    outline-offset: 3px;
+}
+
+.total-pago {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    margin: .5rem 0;
+    border-top: 1px solid var(--borde, #e4ddd1);
+    color: var(--cafe, #392b25);
+    font-size: 1.15rem;
+}
+
+.total-pago strong {
+    white-space: nowrap;
+}
+
+.despachar {
+    width: 100%;
+    margin-top: .65rem;
+}
+
+.todos-listos {
+    width: 100%;
+    margin-top: .65rem;
+}
+
+.ayuda-despacho {
+    font-size: .85rem;
+}
+
+@media (max-width: 800px) {
+    .recepcion {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lista-ordenes {
+        max-height: 17rem;
+    }
+}

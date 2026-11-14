@@ -1,0 +1,10 @@
+<link rel="stylesheet" href="../../../../resources/estilos/tarjeta.css">
+<section aria-label="Catálogo de productos">
+    <div class="buscador-productos">
+        <label for="buscar">¿Qué se te antoja?</label>
+        <input id="buscar" type="search" placeholder="Buscar productos" autocomplete="off" disabled>
+    </div>
+    <p role="status" aria-live="polite"></p>
+    <div class="explorar-categorias"><slot></slot></div>
+    <div class="categorias"></div>
+</section>

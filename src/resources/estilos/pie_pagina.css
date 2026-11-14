@@ -1,0 +1,16 @@
+:host {
+    display: block;
+}
+
+footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--borde, #e4ddd1);
+    color: var(--cafe-suave, #735848);
+    background: var(--panel, #e7e2db);
+    text-align: center;
+}
+
+small {
+    font: inherit;
+    font-size: .85rem;
+}

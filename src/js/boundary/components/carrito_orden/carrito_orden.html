@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../resources/estilos/orden_publica.css">
+    <button id="abrir" type="button" aria-haspopup="dialog">
+        <img src="../../../../resources/imagenes/iconos/carrito.png" alt="">
+        <span>Mi carrito (0)</span>
+    </button>
+    <dialog aria-labelledby="titulo">
+        <button type="button" id="cerrar" aria-label="Cerrar carrito">×</button>
+        <h2 id="titulo">Mi carrito</h2>
+        <resumen-orden><span slot="titulo">Productos</span></resumen-orden>
+        <form novalidate><label>Nombre del cliente<input name="cliente" required maxlength="200" autocomplete="given-name"></label>
+            <button type="submit" id="pedir">Pedir</button>
+            <div id="revision" hidden>
+                <p>¿Confirmas este pedido?</p>
+                <div class="acciones-pedido">
+                    <button type="button" id="editar">Seguir editando</button>
+                    <button type="button" id="confirmar">Confirmar pedido</button>
+                </div>
+            </div>
+        </form>
+        <p role="status"></p>
+    </dialog>

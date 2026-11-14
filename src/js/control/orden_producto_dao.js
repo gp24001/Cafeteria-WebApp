@@ -1,3 +1,4 @@
+import OrdenProducto from "../entity/orden_producto.js";
 import DefaultDao from "./default_dao.js";
 
 /** Acceso al recurso REST OrdenProducto dentro de Orden. */
@@ -7,7 +8,7 @@ export default class OrdenProductoDao extends DefaultDao {
      * @param {string} idOrden UUID del registro principal.
      */
     constructor(idOrden) {
-        super();
+        super(OrdenProducto);
         this.URL += `orden/${encodeURIComponent(idOrden)}/producto`;
     }
 

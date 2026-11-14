@@ -1,10 +1,11 @@
+import Descuento from "../entity/descuento.js";
 import DefaultDao from "./default_dao.js";
 
 /** Acceso al recurso REST Descuento. */
 export default class DescuentoDao extends DefaultDao {
     /** Configura la ruta de Descuento. */
     constructor() {
-        super();
+        super(Descuento);
         this.URL += "descuento";
     }
 }

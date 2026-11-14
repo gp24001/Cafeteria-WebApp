@@ -1,0 +1,88 @@
+:host {
+    --altura-barra-superior: 4rem;
+    display: grid;
+    grid-template-columns: 0 minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    min-height: 100dvh;
+}
+
+:host([menu-abierto]) {
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+barra-superior {
+    grid-column: 1 / -1;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+menu-lateral {
+    grid-column: 1;
+    grid-row: 2;
+    display: block;
+    visibility: hidden;
+    overflow: clip;
+    background: var(--cafe);
+    color: var(--crema);
+}
+
+:host([menu-abierto]) menu-lateral {
+    visibility: visible;
+}
+
+main {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    width: 100%;
+    max-width: 85rem;
+    padding: clamp(1.25rem, 4vw, 3.5rem);
+}
+
+pie-pagina {
+    grid-column: 1 / -1;
+    grid-row: 3;
+}
+
+h1 {
+    margin: 0 0 1.6rem;
+    color: var(--cafe);
+    font: 500 clamp(2rem, 3.5vw, 2.9rem) Georgia, serif;
+    letter-spacing: -.03em;
+}
+
+:host([area-empleados]) main {
+    max-width: 90rem;
+    padding: clamp(1.1rem, 2.3vw, 2rem);
+}
+
+:host([area-empleados]) h1 {
+    margin-bottom: 1rem;
+    font-size: clamp(1.75rem, 2.7vw, 2.3rem);
+}
+
+@media (max-width: 700px) {
+    :host {
+        display: flex;
+        flex-direction: column;
+    }
+
+    main { flex: 1; }
+
+    menu-lateral {
+        display: none;
+    }
+
+    :host([menu-abierto]) menu-lateral {
+        display: block;
+        position: sticky;
+        top: var(--altura-barra-superior);
+        z-index: 10;
+    }
+
+}

@@ -1,7 +1,29 @@
 import DefaultError from "../entity/default_error.js";
 import DefaultResponse from "../entity/default_response.js";
+
+/**
+ * Convierte JSON al tipo del recurso, conservando los campos que envió el servidor.
+ * Un registro parcial conserva sus omisiones al volver a serializarlo.
+ * @param {Function} Tipo Clase de la entidad y de sus relaciones declaradas.
+ * @param {object|null} datos Representación recibida de la API.
+ * @returns {object|null} Entidad con las relaciones recibidas, sin completar campos ausentes.
+ */
+function desdeJson(Tipo, datos) {
+    if (Tipo === Object || datos == null) return datos;
+    const registro = Object.assign(Object.create(Tipo.prototype), datos);
+    for (const [campo, Relacion] of Object.entries(Tipo.relaciones || {})) {
+        if (datos[campo] && typeof datos[campo] === "object") {
+            registro[campo] = desdeJson(Relacion, datos[campo]);
+        }
+    }
+    return registro;
+}
+
+/** Comparte consultas REST, paginación y conversión de entidades entre los DAO específicos. */
 class DefaultDao {
-    constructor() {
+    /** Recibe el tipo de entidad y establece la dirección base de la API existente. */
+    constructor(Entidad = Object) {
+        this.Entidad = Entidad;
         this._BASE_URL = "http://localhost:9080/cafefe-1.0-SNAPSHOT/resources/v1/";
         this.URL = this._BASE_URL;
     }
@@ -11,35 +33,32 @@ class DefaultDao {
      * @param {number} max cantidad maxima de registros a obtener
      * @returns {Promise<DefaultResponse>} Página y total de registros. Rechaza con DefaultError si falla la consulta.
      */
-    findRange(first, max) {
-        let errorSalida = new DefaultError();
-        let salida = new Promise((resolve, reject) => {
-            fetch(`${this.URL}?min=${first}&max=${max}`, { method: "GET" }).then(r => {
-                if (r.status === 200) {
-                    r.json().then(j => {
-                        let respuesta = new DefaultResponse();
-                        respuesta.datos = j;
-                        respuesta.totalDatos = r.headers.get("Total-registros");
-                        resolve(respuesta);
-
-                    }).catch(e => {
-                        errorSalida.mensaje = "Error al procesar los datos de respuesta";
-                        errorSalida.error = e;
-                        reject(errorSalida);
-                    })
-                } else {
-                    errorSalida.mensaje = `Error al obtener los datos: ${r.status}`;
-                    errorSalida.error = r;
-                    reject(errorSalida);
-
-                }
-            }).catch(e => {
-                errorSalida.mensaje = "Error al acceder al repositorio";
-                errorSalida.error = e;
-                reject(errorSalida);
-            });
-        });
-        return salida;
+    async findRange(first, max) {
+        const fallo = new DefaultError();
+        let respuesta;
+        try {
+            respuesta = await fetch(`${this.URL}?min=${first}&max=${max}`, { method: "GET" });
+        } catch (error) {
+            fallo.mensaje = "Error al acceder al repositorio";
+            fallo.error = error;
+            throw fallo;
+        }
+        if (respuesta.status !== 200) {
+            fallo.mensaje = `Error al obtener los datos: ${respuesta.status}`;
+            fallo.error = respuesta;
+            throw fallo;
+        }
+        try {
+            const datos = await respuesta.json();
+            const pagina = new DefaultResponse();
+            pagina.datos = datos.map(registro => desdeJson(this.Entidad, registro));
+            pagina.totalDatos = respuesta.headers.get("Total-registros");
+            return pagina;
+        } catch (error) {
+            fallo.mensaje = "Error al procesar los datos de respuesta";
+            fallo.error = error;
+            throw fallo;
+        }
     }
 
     /**
@@ -52,13 +71,29 @@ class DefaultDao {
     }
 
     /**
+     * Reúne las páginas de la colección respetando el límite de 50 de la API.
+     * @returns {Promise<object[]>} Registros recibidos en el orden de las páginas.
+     * @throws {DefaultError} Propaga el fallo de cualquier página sin devolver un catálogo parcial.
+     */
+    async listarTodos() {
+        const registros = [];
+        let pagina;
+        do {
+            pagina = await this.findRange(registros.length, 50);
+            registros.push(...pagina.datos);
+        } while (pagina.datos.length && registros.length < Number(pagina.totalDatos));
+        return registros;
+    }
+
+    /**
      * Ejecuta una operación que devuelve un objeto JSON.
      * @param {string} url Dirección del recurso.
      * @param {RequestInit} [opciones] Método, cabeceras y cuerpo para fetch.
+     * @param {Function} [Tipo] Clase de la entidad o del objeto de respuesta.
      * @returns {Promise<object>} Datos de la respuesta.
      * @throws {DefaultError} Conserva la respuesta HTTP o la causa del fallo.
      */
-    async solicitarJson(url, opciones) {
+    async solicitarJson(url, opciones, Tipo = this.Entidad) {
         const fallo = new DefaultError();
         let respuesta;
         try {
@@ -74,7 +109,7 @@ class DefaultDao {
             throw fallo;
         }
         try {
-            return await respuesta.json();
+            return desdeJson(Tipo, await respuesta.json());
         } catch (error) {
             fallo.mensaje = "Error al procesar los datos de respuesta";
             fallo.error = error;

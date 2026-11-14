@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="../../../../resources/estilos/empleados.css">
+<section class="ingreso" aria-labelledby="bienvenida">
+    <span class="eyebrow">Equipo Cafefe</span>
+    <h2 id="bienvenida">Bienvenido de nuevo</h2>
+    <p>Ingresa para acceder a tu área de trabajo.</p>
+    <form novalidate>
+        <label for="nombre">Nombre del empleado</label>
+        <input id="nombre" name="nombre" autocomplete="username" required maxlength="200">
+        <label for="identificador">Contraseña</label>
+        <input id="identificador" name="identificador" type="password" autocomplete="current-password" required aria-describedby="ayuda">
+        <small id="ayuda">Usa tu identificador único de empleado.</small>
+        <p class="estado" role="status" aria-live="polite"></p>
+        <button type="submit">Iniciar sesión</button>
+    </form>
+    <a class="volver-cliente" href="#inicio">Continuar como cliente</a>
+</section>

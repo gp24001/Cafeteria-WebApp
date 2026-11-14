@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../resources/estilos/cobro.css">
+    <section aria-label="Facturación y pagos" aria-busy="false">
+        <h3>Cobro de la orden</h3>
+        <div class="factura" hidden>
+            <p class="caja"></p><p class="numero" hidden></p>
+            <dl class="totales" aria-live="polite"><div><dt>Total</dt><dd class="total"></dd></div><div><dt>Pagado</dt><dd class="pagado"></dd></div><div><dt>Saldo pendiente</dt><dd class="saldo"></dd></div></dl>
+            <form hidden novalidate>
+                <fieldset><legend>Forma de pago</legend>
+                    <label><input type="radio" name="medio" value="EFECTIVO" checked> Efectivo</label>
+                    <label><input type="radio" name="medio" value="TARJETA"> Tarjeta</label>
+                </fieldset>
+                <div class="campos"><div><label for="monto">Importe del abono (USD)</label><input id="monto" type="text" inputmode="decimal" autocomplete="off" required placeholder="0.00" aria-describedby="ayuda-monto"></div>
+                <div class="referencia" hidden><label for="referencia">Referencia del comprobante (opcional)</label><input id="referencia" maxlength="200" autocomplete="off" placeholder="Referencia del terminal"></div></div>
+                <small id="ayuda-monto">Registra el importe a aplicar, hasta el saldo pendiente. Puedes combinar abonos.</small>
+                <button class="abonar" type="submit">Registrar abono</button>
+            </form>
+            <h4>Pagos registrados</h4><ul class="historial"></ul>
+            <div class="acciones"><button class="ticket" type="button" hidden>Descargar ticket PDF</button><button class="anular secundario" type="button" hidden>Anular orden</button></div>
+            <p class="ayuda-anulacion" hidden>No se puede anular una orden con pagos registrados.</p>
+        </div>
+        <dialog aria-labelledby="titulo-anulacion"><form class="form-anulacion" novalidate>
+            <h3 id="titulo-anulacion">Anular orden</h3><p>La orden saldrá de pendientes de pago. Se conservarán sus datos y el motivo en el historial.</p>
+            <label for="motivo">Motivo de anulación</label><textarea id="motivo" required maxlength="500" rows="3"></textarea>
+            <div class="acciones"><button class="volver secundario" type="button">Volver</button><button class="confirmar-anulacion" type="submit">Confirmar anulación</button></div>
+        </form></dialog>
+    </section>
