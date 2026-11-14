@@ -6,8 +6,12 @@ const plantilla = await cargarPlantilla(new URL("./tarjeta_tipo_producto.html", 
 /** Selecciona exclusivamente una ilustración local según el nombre de la categoría. */
 export function ilustracionCategoria(categoria) {
     const nombre = (categoria?.nombre || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    const ilustraciones = [[/alcohol|vino|cerveza/, "alcoholica"], [/caliente|cafe|^tes?$/, "caliente"],
-        [/bebida|jugo|refresco/, "bebida"], [/postre|pastel|panader/, "postre"], [/comida|sandwich/, "comida"]];
+    /**Pone una imagen local para cada tipo producto por ejemplo: [/comida/, "comida"] */
+    const ilustraciones = [
+        [/bebidas calientes/, "bebidacaliente"],
+        [/bebidas frias/, "bebidafria"],
+        [/postre/, "postre"], 
+        [/comida/, "comida"]];
     return ilustraciones.find(([patron]) => patron.test(nombre))?.[1] || "categoria";
 }
 

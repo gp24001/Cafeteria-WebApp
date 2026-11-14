@@ -1,5 +1,8 @@
 import ProductoDao from "../../../control/producto_dao.js";
+import ProductoTipoProductoDao from "../../../control/producto_tipo_producto_dao.js";
+import TipoProductoDao from "../../../control/tipo_producto_dao.js";
 import TarjetaProducto from "../tarjeta_producto/tarjeta_producto.js";
+import { ilustracionCategoria } from "../tarjeta_tipo_producto/tarjeta_tipo_producto.js";
 import { agruparPresentaciones } from "../../../control/presentaciones_producto.js";
 import ActualizacionAutomatica from "../../../control/actualizacion_automatica.js";
 import BusquedaCatalogo from "../../../control/busqueda_catalogo.js";
@@ -18,6 +21,7 @@ export default class BuscadorProductos extends HTMLElement {
         this.catalogo = new ProductoDao();
         this.buscador = new BusquedaCatalogo();
         this.productos = [];
+        this.ilustraciones = new Map();
         this.root.appendChild(plantilla.content.cloneNode(true));
         this.entrada = this.root.querySelector("input");
         this.estado = this.root.querySelector("[role=status]");
@@ -50,14 +54,20 @@ export default class BuscadorProductos extends HTMLElement {
         const consulta = this.consulta = Symbol();
         if (!silenciosa) { this.entrada.disabled = true; this.lista.replaceChildren(); this.estado.textContent = "Cargando productos…"; }
         try {
-            const productos = await agruparPresentaciones(await this.catalogo.listarTodos());
+            const registros = await this.catalogo.listarTodos();
+            const [productos, ilustraciones] = await Promise.all([
+                agruparPresentaciones(registros), this.cargarIlustraciones(registros)
+            ]);
             if (this.consulta !== consulta) return;
             if (silenciosa && Array.from(this.lista.children).some(t => t.dialogo?.open)) return;
             const activos = productos.filter(producto => producto.activo);
-            if (silenciosa && JSON.stringify(activos) === JSON.stringify(this.productos) && !this.entrada.disabled && !this.errorConexion) return false;
+            if (silenciosa && JSON.stringify(activos) === JSON.stringify(this.productos)
+                && JSON.stringify([...ilustraciones]) === JSON.stringify([...this.ilustraciones])
+                && !this.entrada.disabled && !this.errorConexion) return false;
             this.errorConexion = false;
             this.ultimoError = "";
             this.productos = activos;
+            this.ilustraciones = ilustraciones;
             this.buscador.establecerProductos(activos);
             this.entrada.disabled = false;
             await this.mostrar();
@@ -71,6 +81,27 @@ export default class BuscadorProductos extends HTMLElement {
             if (this.ultimoError !== mensaje) notificar(this, mensaje, "error");
             this.ultimoError = mensaje;
         }
+    }
+
+    /**
+     * Resuelve la imagen de categoría para las coincidencias del buscador general.
+     * Si no puede consultarse una asociación, conserva su imagen anterior o usa la genérica.
+     * @param {object[]} productos Productos del catálogo, incluidos los registros de cada presentación.
+     * @returns {Promise<Map<string, string>>} Nombre de imagen local por ID de producto.
+     */
+    async cargarIlustraciones(productos) {
+        try {
+            const categorias = new Map((await new TipoProductoDao().listarTodos())
+                .filter(categoria => categoria.activo).map(categoria => [categoria.idTipoProducto, categoria]));
+            const ilustraciones = await Promise.all(productos.filter(producto => producto.activo).map(async producto => {
+                try {
+                    const relaciones = await new ProductoTipoProductoDao(producto.idProducto).listarTodos();
+                    const relacion = relaciones.find(r => r.activo && categorias.has(r.idTipoProducto?.idTipoProducto));
+                    return [producto.idProducto, ilustracionCategoria(categorias.get(relacion?.idTipoProducto?.idTipoProducto))];
+                } catch { return [producto.idProducto, this.ilustraciones.get(producto.idProducto) || "categoria"]; }
+            }));
+            return new Map(ilustraciones);
+        } catch { return this.ilustraciones; }
     }
 
     /** Presenta solo la última búsqueda resuelta sin insertar datos del usuario como HTML. */
@@ -95,7 +126,10 @@ export default class BuscadorProductos extends HTMLElement {
             tarjeta.toggleAttribute("seleccionable", this.hasAttribute("seleccionable"));
             return tarjeta;
         }, (tarjeta, producto) => {
-            if (JSON.stringify(tarjeta.producto) !== JSON.stringify(producto)) tarjeta.producto = producto;
+            const ilustracion = this.ilustraciones.get(producto.idProducto) || "categoria";
+            const cambio = tarjeta.ilustracion !== ilustracion;
+            tarjeta.ilustracion = ilustracion;
+            if (cambio || JSON.stringify(tarjeta.producto) !== JSON.stringify(producto)) tarjeta.producto = producto;
         });
         this.estado.textContent = coincidencias.length
             ? `${coincidencias.length} ${coincidencias.length === 1 ? "producto disponible" : "productos disponibles"}`

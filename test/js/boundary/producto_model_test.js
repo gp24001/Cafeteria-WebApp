@@ -6,6 +6,7 @@ import TipoProductoDao from "../../../src/js/control/tipo_producto_dao.js";
 import CaracteristicaDao from "../../../src/js/control/caracteristica_dao.js";
 import TipoCaracteristicaDao from "../../../src/js/control/tipo_caracteristica_dao.js";
 import ProductoCaracteristicaDao from "../../../src/js/control/producto_caracteristica_dao.js";
+import ProductoTipoProductoDao from "../../../src/js/control/producto_tipo_producto_dao.js";
 
 mocha.setup("tdd");
 
@@ -24,6 +25,9 @@ suite("ProductoModel: Unidad", function () {
         sinon.stub(CaracteristicaDao.prototype, "listarTodos").resolves([]);
         sinon.stub(TipoCaracteristicaDao.prototype, "listarTodos").resolves([]);
         sinon.stub(ProductoCaracteristicaDao.prototype, "listarTodos").resolves([]);
+        sinon.stub(ProductoTipoProductoDao.prototype, "listarTodos").resolves([
+            { activo: true, idTipoProducto: { idTipoProducto: "bebidas" } }
+        ]);
     });
     teardown(() => { pantalla.remove(); sinon.restore(); });
 
@@ -68,6 +72,23 @@ suite("ProductoModel: Unidad", function () {
         sinon.assert.notCalled(productos);
         expect(detalle.root.querySelector("[role=status]").textContent).to.equal("Categoría no disponible.");
         expect(detalle.root.querySelector("tarjeta-producto")).to.equal(null);
+    });
+
+    test("cargar permite buscar y seleccionar productos aunque falle la consulta auxiliar de categorías", async function () {
+        sinon.stub(TipoProductoDao.prototype, "listarTodos").rejects(new Error("Sin categorías"));
+        const buscador = abrir();
+        await buscador.cargar();
+        buscador.entrada.value = "cafe";
+        await buscador.mostrar();
+        const tarjeta = buscador.lista.firstElementChild;
+        expect(tarjeta.producto.idProducto).to.equal("cafe");
+        expect(buscador.entrada.disabled).to.be.false;
+        const agregar = sinon.spy();
+        pantalla.addEventListener("agregar-producto", agregar);
+        tarjeta.abrir();
+        tarjeta.boton.click();
+        sinon.assert.calledOnce(agregar);
+        expect(agregar.firstCall.args[0].detail).to.include({ idProducto: cafe.idProducto, precioSugerido: cafe.precioSugerido, cantidad: 1 });
     });
 
     test("el filtro de categoría se conserva al actualizar sus productos en segundo plano", async function () {

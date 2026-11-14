@@ -9,7 +9,7 @@ mocha.setup("tdd");
 suite("RecepcionOrdenDao: Unidad", function () {
     teardown(() => sinon.restore());
 
-    test("separa cocina y caja: emitidas y parciales van a pago; anuladas permiten preparar", async function () {
+    test("envía las facturas emitidas y parciales a pagos y excluye las anuladas de cocina aunque no tengan estado web", async function () {
         const dao = new RecepcionOrdenDao();
         const ids = ["nueva", "emitida", "parcial", "anulada", "pagada", "mixta", "vacia"];
         sinon.stub(dao.ordenes, "listarTodos").resolves(ids.map((idOrden, i) => ({ idOrden, fechaOrden: `2026-11-${String(12 - i).padStart(2, "0")}T12:00:00Z` })));
@@ -23,10 +23,10 @@ suite("RecepcionOrdenDao: Unidad", function () {
         });
         const facturadas = sinon.stub(FacturaOrdenProductoDao.prototype, "listarTodos").callsFake(function () {
             const factura = this.URL.split("/").at(-2);
-            return Promise.resolve(({ f1: ["emitida"], f2: ["parcial"], f4: ["pagada", "mixta1"] }[factura] || [])
+            return Promise.resolve(({ f1: ["emitida"], f2: ["parcial"], f3: ["anulada"], f4: ["pagada", "mixta1"] }[factura] || [])
                 .map(idOrdenProducto => ({ idOrdenProducto: { idOrdenProducto } })));
         });
-        expect((await dao.pendientes()).map(o => o.idOrden)).to.deep.equal(["anulada", "nueva"]);
+        expect((await dao.pendientes()).map(o => o.idOrden)).to.deep.equal(["nueva"]);
         sinon.assert.callCount(facturadas, 4);
         sinon.assert.callCount(detalles, 7);
         expect((await dao.paraFacturacion()).map(o => o.idOrden)).to.deep.equal(["mixta", "parcial", "emitida"]);

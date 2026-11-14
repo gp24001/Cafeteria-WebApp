@@ -74,11 +74,13 @@ export default class ProductosCategoria extends HTMLElement {
             this.revision = revision;
             actualizarLista(lista, productos.filter(p => p.activo), producto => producto.idProducto || producto.nombre, () => {
                 const tarjeta = new TarjetaProducto();
-                tarjeta.ilustracion = ilustracionCategoria(categoria);
                 tarjeta.toggleAttribute("seleccionable", this.hasAttribute("seleccionable"));
                 return tarjeta;
             }, (tarjeta, producto) => {
-                if (JSON.stringify(tarjeta.producto) !== JSON.stringify(producto)) tarjeta.producto = producto;
+                const ilustracion = ilustracionCategoria(categoria);
+                const cambio = tarjeta.ilustracion !== ilustracion;
+                tarjeta.ilustracion = ilustracion;
+                if (cambio || JSON.stringify(tarjeta.producto) !== JSON.stringify(producto)) tarjeta.producto = producto;
             });
             this.busqueda.disabled = false;
             this.filtrar();

@@ -165,7 +165,9 @@ export default class TarjetaProducto extends HTMLElement {
         const nombre = producto?.nombre || "";
         this.root.querySelector("h3").textContent = nombre;
         this.root.querySelector("h2").textContent = nombre;
-        const locales = { cheesecake: "cheesecake", expresso: "caliente", quesadilla: "quesadilla" };
+        /** Agrega imagenes para productos en especifico aqui, por ejemplo { expresso: "caliente"} 
+         * { nombreDelProductoenminuscula: "nombre de la imagen sin el .png"} */
+        const locales = { expresso: "caliente"};
         const archivo = locales[nombre.trim().toLowerCase()] || this.ilustracion || "categoria";
         const respaldo = new URL(`../../../../resources/imagenes/${archivo}.png`, import.meta.url).href;
         for (const imagen of this.root.querySelectorAll("img")) {

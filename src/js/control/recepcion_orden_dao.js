@@ -60,10 +60,10 @@ export default class RecepcionOrdenDao {
         return unidades;
     }
 
-    /** Devuelve las órdenes de cocina excluyendo facturadas y despachadas. */
+    /** Devuelve las órdenes de cocina excluyendo anuladas, facturadas y despachadas. */
     async pendientes() {
         return (await this.sinPagar()).map(o => ordenConPreparacion(o, o.unidades))
-            .filter(o => !o.facturada && o.estadoPreparacion !== "DESPACHADA");
+            .filter(o => !o.anulada && !o.facturada && o.estadoPreparacion !== "DESPACHADA");
     }
 
     /** Devuelve órdenes que requieren pago, excluyendo las que solo tienen facturas anuladas. */
