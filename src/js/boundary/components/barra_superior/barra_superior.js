@@ -27,7 +27,7 @@ export default class BarraSuperior extends HTMLElement {
     /** Muestra el carrito solo en Productos sin perder su contenido al navegar. */
     actualizarRuta(ruta) {
         const carrito = this.root.querySelector("orden-model");
-        carrito.hidden = ruta !== "productos";
+        carrito.hidden = ruta !== "productos" || !sesionEmpleado.puedeAcceder("productos");
         if (carrito.hidden && carrito.dialogo?.open) carrito.dialogo.close();
     }
 
@@ -42,6 +42,7 @@ export default class BarraSuperior extends HTMLElement {
 
     /** Traslada al carrito el producto seleccionado en el catálogo. */
     agregar(producto) {
+        if (!sesionEmpleado.puedeAcceder("productos")) return;
         this.root.querySelector("orden-model").agregar(producto);
     }
 }

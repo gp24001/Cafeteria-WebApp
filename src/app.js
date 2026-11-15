@@ -81,7 +81,24 @@ export class CafefeApp extends HTMLElement {
         this.superior.actualizarSesion(sesionEmpleado.actual);
         this.superior.actualizarRuta(ruta);
         this.toggleAttribute("area-empleados", ["preparacion", "pagos"].includes(ruta));
-        if (ruta === "inicio") {
+        if (["productos", "preparacion", "pagos"].includes(ruta) && sesionEmpleado.restaurando) {
+            const estado = document.createElement("p");
+            estado.setAttribute("role", "status");
+            estado.textContent = "Verificando sesión…";
+            this.main.append(titulo, estado);
+        } else if (!sesionEmpleado.puedeAcceder(ruta)) {
+            this.main.appendChild(titulo);
+            if (!sesionEmpleado.actual) {
+                this.main.appendChild(document.createElement("ingreso-model"));
+            } else {
+                const mensaje = document.createElement("p");
+                mensaje.textContent = "Tu rol no tiene acceso a esta pantalla.";
+                const enlace = document.createElement("a");
+                enlace.href = "#" + sesionEmpleado.destino;
+                enlace.textContent = "Ir a mi área de trabajo";
+                this.main.append(mensaje, enlace);
+            }
+        } else if (ruta === "inicio") {
             this.main.appendChild(document.createElement("inicio-model"));
         } else if (ruta === "productos") {
             const productos = document.createElement("producto-model");
@@ -93,21 +110,7 @@ export class CafefeApp extends HTMLElement {
             this.main.append(titulo, document.createElement("ingreso-model"));
         } else if (["preparacion", "pagos"].includes(ruta)) {
             this.main.appendChild(titulo);
-            if (sesionEmpleado.restaurando) {
-                const estado = document.createElement("p");
-                estado.setAttribute("role", "status");
-                estado.textContent = "Verificando sesión…";
-                this.main.appendChild(estado);
-            } else if (!sesionEmpleado.actual) {
-                this.main.appendChild(document.createElement("ingreso-model"));
-            } else if (!sesionEmpleado.puedeAcceder(ruta)) {
-                const mensaje = document.createElement("p");
-                mensaje.textContent = "Tu rol no tiene acceso a esta pantalla.";
-                const enlace = document.createElement("a");
-                enlace.href = "#" + sesionEmpleado.destino;
-                enlace.textContent = "Ir a mi área de trabajo";
-                this.main.append(mensaje, enlace);
-            } else if (ruta === "preparacion") {
+            if (ruta === "preparacion") {
                 this.main.appendChild(document.createElement("preparacion-model"));
             } else {
                 this.main.appendChild(document.createElement("facturacion-model"));

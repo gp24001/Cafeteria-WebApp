@@ -28,7 +28,7 @@ export default class Bienvenida extends HTMLElement {
         this.root.querySelector(".eyebrow").textContent = actual ? "Tu espacio de trabajo" : "Tu pausa de cada día";
         this.root.querySelector(".mensaje").textContent = actual
             ? "Todo listo para comenzar. Elige tu área de trabajo."
-            : "Un café, algo rico y un momento para disfrutar. Descubre lo que tenemos para ti y prepara tu pedido.";
+            : "¡Bienvenido a nuestra cafetería! Elige tus favoritos, haz tu pedido en línea y pasa a recogerlo. ¡Te esperamos!";
         const acciones = this.root.querySelector(".acciones");
         acciones.replaceChildren();
         for (const ruta of (actual ? this.sesion.rutas() : ["productos"])) {

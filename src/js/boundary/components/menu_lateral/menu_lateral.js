@@ -41,9 +41,9 @@ export default class MenuLateral extends HTMLElement {
         return enlace;
     }
 
-    /** Conserva las rutas públicas y añade las áreas permitidas al empleado. */
+    /** Muestra Inicio y las áreas que corresponden a la sesión actual. */
     actualizarSesion(sesion) {
-        const rutas = ["inicio", "productos", ...["preparacion", "pagos"].filter(ruta => sesion.actual && sesion.puedeAcceder(ruta))];
+        const rutas = ["inicio", ...["productos", "preparacion", "pagos"].filter(ruta => sesion.puedeAcceder(ruta))];
         this.navegacion.replaceChildren();
         for (const ruta of rutas) {
             this.navegacion.appendChild(this.crearEnlace(ruta));

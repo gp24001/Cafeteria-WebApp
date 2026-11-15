@@ -35,7 +35,10 @@ export class SesionEmpleado extends EventTarget {
 
     /** Comprueba si la sesión puede abrir la ruta solicitada. */
     puedeAcceder(ruta) {
-        return !["preparacion", "pagos"].includes(ruta) || this.rutas().includes(ruta);
+        if (!["productos", "preparacion", "pagos"].includes(ruta)) return true;
+        if (this.restaurando) return false;
+        if (ruta === "productos" && !this.actual) return true;
+        return this.rutas().includes(ruta);
     }
 
     /** Devuelve la primera pantalla permitida para la sesión actual. */

@@ -23,6 +23,7 @@ suite("SesionEmpleado: Unidad", function () {
         expect(sesion.actual.roles[0]).to.deep.equal({ idRol: "barista", nombre: "Barista", idEmpleadoRol: "asignacion" });
         expect(sesion.puedeAcceder("preparacion")).to.be.true;
         expect(sesion.puedeAcceder("pagos")).to.be.false;
+        expect(sesion.puedeAcceder("productos")).to.be.false;
         expect(sesion.destino).to.equal("preparacion");
         expect(JSON.parse(datos.get(sesion.clave))).to.deep.equal({ idEmpleado: id });
     });
@@ -57,9 +58,36 @@ suite("SesionEmpleado: Unidad", function () {
         await sesion.iniciar("Ana", id);
         expect(sesion.destino).to.equal("pagos");
         expect(sesion.puedeAcceder("preparacion")).to.be.false;
+        expect(sesion.puedeAcceder("productos")).to.be.false;
         asignaciones.resolves([{ idEmpleadoRol: "caja1", idRol: { idRol: "caja" }, activo: true }, { idEmpleadoRol: "cocina1", idRol: { idRol: "cocina" }, activo: true }]);
         await sesion.iniciar("Ana", id);
         expect(sesion.rutas()).to.deep.equal(["pagos", "preparacion"]);
+        expect(sesion.puedeAcceder("productos")).to.be.false;
+    });
+
+    for (const [nombre, permitida] of [["Cajero", "pagos"], ["Mesero", "productos"], ["Barista", "preparacion"]]) {
+        test(nombre + " accede únicamente a su área de trabajo", async function () {
+            roles.resolves([{ idRol: "trabajo", nombre, activo: true }]);
+            asignaciones.resolves([{ idEmpleadoRol: "puesto", idRol: { idRol: "trabajo" }, activo: true }]);
+            await sesion.iniciar("Ana", id);
+
+            expect(sesion.rutas()).to.deep.equal([permitida]);
+            for (const ruta of ["productos", "preparacion", "pagos"]) {
+                expect(sesion.puedeAcceder(ruta), ruta).to.equal(ruta === permitida);
+            }
+        });
+    }
+
+    test("el invitado puede pedir productos y la restauración espera a verificar los permisos", function () {
+        expect(sesion.puedeAcceder("productos")).to.be.true;
+        expect(sesion.puedeAcceder("preparacion")).to.be.false;
+        expect(sesion.puedeAcceder("pagos")).to.be.false;
+
+        sesion.restaurando = true;
+        expect(sesion.puedeAcceder("productos")).to.be.false;
+        expect(sesion.puedeAcceder("preparacion")).to.be.false;
+        expect(sesion.puedeAcceder("pagos")).to.be.false;
+        expect(sesion.puedeAcceder("inicio")).to.be.true;
     });
 
     test("restaura consultando los roles reales y descarta permisos escritos en almacenamiento", async function () {
