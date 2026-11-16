@@ -25,6 +25,35 @@ suite("PagoModel: Unidad", function () {
         sinon.restore();
     });
 
+    test("al cambiar de orden descarta el efectivo y el vuelto que quedaron sin confirmar", async function () {
+        vista = document.createElement("cobro-factura");
+        document.body.appendChild(vista);
+        const primera = { factura: { idFactura: "f1" }, total: 325, pagado: 0, saldo: 325, historial: [] };
+        const segunda = { factura: { idFactura: "f2" }, total: 150, pagado: 0, saldo: 150, historial: [] };
+        const cargar = sinon.stub(vista.dao, "cargar");
+        cargar.onFirstCall().resolves(primera);
+        cargar.onSecondCall().resolves(segunda);
+        const abonar = sinon.stub(vista.dao, "abonar");
+
+        await vista.abrir({ idOrden: "o1" }, "cajero", "Ana");
+        const efectivo = vista.root.querySelector("#monto");
+        const vuelto = vista.root.querySelector("#vuelto");
+        efectivo.value = "5";
+        efectivo.dispatchEvent(new Event("input"));
+        expect(vuelto.textContent).to.include("$1.75");
+
+        await vista.abrir({ idOrden: "o2" }, "cajero", "Ana");
+        expect(efectivo.value).to.equal("");
+        expect(vuelto.hidden).to.be.true;
+        await vista.abonar();
+        sinon.assert.notCalled(abonar);
+
+        efectivo.value = "2";
+        efectivo.dispatchEvent(new Event("input"));
+        expect(vuelto.hidden).to.be.false;
+        expect(vuelto.textContent).to.include("$0.50");
+    });
+
     test("en pagos mantiene el total visible y los productos plegados sin reiniciar el despliegue al sincronizar", async function () {
         vista = new PagoModel();
         vista.sesion = { actual: { empleado: barista.empleado, roles: [{ nombre: "Cajero", idEmpleadoRol: "cajero" }] }, puedeAcceder: () => true };

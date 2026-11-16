@@ -9,9 +9,9 @@
                     <label><input type="radio" name="medio" value="EFECTIVO" checked> Efectivo</label>
                     <label><input type="radio" name="medio" value="TARJETA"> Tarjeta</label>
                 </fieldset>
-                <div class="campos"><div><label for="monto">Importe del abono (USD)</label><input id="monto" type="text" inputmode="decimal" autocomplete="off" required placeholder="0.00" aria-describedby="ayuda-monto"></div>
+                <div class="campos"><div><label for="monto">Efectivo recibido (USD)</label><input id="monto" type="text" inputmode="decimal" autocomplete="off" required placeholder="0.00" aria-describedby="ayuda-monto"></div>
                 <div class="referencia" hidden><label for="referencia">Referencia del comprobante (opcional)</label><input id="referencia" maxlength="200" autocomplete="off" placeholder="Referencia del terminal"></div></div>
-                <small id="ayuda-monto">Registra el importe a aplicar, hasta el saldo pendiente. Puedes combinar abonos.</small>
+                <small id="ayuda-monto"><span>Puedes combinar abonos.</span><output id="vuelto" for="monto" hidden></output></small>
                 <button class="abonar" type="submit">Registrar abono</button>
             </form>
             <h4>Pagos registrados</h4><ul class="historial"></ul>

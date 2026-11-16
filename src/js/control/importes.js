@@ -13,6 +13,21 @@ export function dinero(valor) {
     return new Intl.NumberFormat("es-SV", { style: "currency", currency: "USD" }).format(valor / 100);
 }
 
+const prefijoEfectivo = "Efectivo recibido (centavos): ";
+
+/** Conserva el efectivo entregado en las observaciones del detalle cuando hubo vuelto. */
+export function observacionEfectivo(recibido) {
+    return prefijoEfectivo + recibido;
+}
+
+/** Los abonos anteriores a la captura de efectivo no registraron vuelto. */
+function vueltoRegistrado(nota, aplicado) {
+    if (typeof nota !== "string" || !nota.startsWith(prefijoEfectivo)) return 0;
+    const recibido = Number(nota.slice(prefijoEfectivo.length));
+    return Number.isSafeInteger(recibido) && recibido > aplicado && nota === observacionEfectivo(recibido)
+        ? recibido - aplicado : 0;
+}
+
 /** Presenta los medios conocidos y conserva el nombre de otros medios registrados en caja. */
 export function nombreMedioPago(tipoPago) {
     if (tipoPago === "EFECTIVO") return "Efectivo";
@@ -27,7 +42,14 @@ export function totalesPorMedio(historial) {
         const nombre = detalle.tipoPago?.trim() || "Medio sin especificar";
         const codigo = nombre.toUpperCase();
         const tipoPago = codigo === "EFECTIVO" || codigo === "TARJETA" ? codigo : nombre;
-        totales.set(tipoPago, (totales.get(tipoPago) || 0) + centavos(detalle.monto));
+        const total = totales.get(tipoPago) || { tipoPago, monto: 0 };
+        const aplicado = centavos(detalle.monto);
+        total.monto += aplicado;
+        if (tipoPago === "EFECTIVO") {
+            const vuelto = vueltoRegistrado(detalle.observaciones, aplicado);
+            if (vuelto) total.vuelto = (total.vuelto || 0) + vuelto;
+        }
+        totales.set(tipoPago, total);
     }
-    return Array.from(totales, ([tipoPago, monto]) => ({ tipoPago, monto }));
+    return Array.from(totales.values());
 }

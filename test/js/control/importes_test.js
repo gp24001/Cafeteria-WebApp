@@ -18,5 +18,15 @@ suite("Importes: Unidad", function () {
         expect(totalesPorMedio(historial)).to.deep.equal([{ tipoPago: "EFECTIVO", monto: 350 }, { tipoPago: "TARJETA", monto: 50 }]);
         expect(JSON.stringify(historial)).to.equal(original);
     });
+    test("solo interpreta como vuelto el efectivo registrado con un importe válido", function () {
+        const detalles = [
+            { tipoPago: " Efectivo ", monto: 1, observaciones: "Efectivo recibido (centavos): 125" },
+            { tipoPago: "EFECTIVO", monto: 2, observaciones: "Efectivo recibido (centavos): pendiente" },
+            { tipoPago: "TARJETA", monto: 3, observaciones: "Efectivo recibido (centavos): 400" }
+        ];
+        expect(totalesPorMedio([{ detalles }])).to.deep.equal([
+            { tipoPago: "EFECTIVO", monto: 300, vuelto: 25 }, { tipoPago: "TARJETA", monto: 300 }
+        ]);
+    });
 });
 mocha.run();

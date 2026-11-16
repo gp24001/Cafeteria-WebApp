@@ -68,7 +68,7 @@ suite("PagoModel: Integración", function () {
         sinon.assert.calledTwice(abonar);
     });
 
-    test("cobra una orden del establecimiento y descarga su PDF al recuperar la confirmación del último abono", async function () {
+    test("recupera el último cobro en efectivo y descarga su PDF con el vuelto sin duplicar el pago", async function () {
         vista.dao.cargar.restore();
         vista.dao.actualizar.restore();
         vista.descargar.restore();
@@ -114,8 +114,9 @@ suite("PagoModel: Integración", function () {
             expect(pantalla.lista.firstElementChild.textContent).to.include("Pedido del establecimiento");
             await pantalla.seleccionar(pantalla.ordenes[0]);
             expect(vista.root.querySelector(".historial li").textContent).to.equal("Tarjeta · $1.00");
-            vista.root.querySelector("#monto").value = "3";
+            vista.root.querySelector("#monto").value = "5";
             await vista.abonar();
+            expect(detalleFinal[0].monto).to.equal(3);
             expect(vista.form.hidden).to.be.true;
             expect(sessionStorage.getItem(clave)).to.be.a("string");
             sinon.assert.notCalled(descargar);
@@ -129,7 +130,7 @@ suite("PagoModel: Integración", function () {
             const contenido = [...texto.matchAll(/<([\da-f]+)> Tj/g)]
                 .map(m => m[1].match(/../g).map(h => String.fromCharCode(parseInt(h, 16))).join("")).join(" ");
             expect(contenido).to.include("Cliente de mesa").and.include("Caja del establecimiento").and.include("Café x1");
-            expect(contenido).to.match(/Tarjeta\s+\$1\.00/).and.match(/Efectivo\s+\$3\.00/);
+            expect(contenido).to.match(/Tarjeta\s+\$1\.00/).and.match(/Efectivo recibido\s+\$5\.00/).and.match(/Cambio\s+\$2\.00/);
             expect(sessionStorage.getItem(clave)).to.equal(null);
             expect(pantalla.lista.children).to.have.lengthOf(0);
             expect(pantalla.seleccionada).to.equal(null);
@@ -142,14 +143,67 @@ suite("PagoModel: Integración", function () {
         }
     });
 
-    test("rechaza el sobrepago antes de enviar y no descarga un ticket", async function () {
+    test("si otra caja abona antes de confirmar, muestra el nuevo vuelto sin registrar el cobro anterior", async function () {
+        // La pantalla muestra $4 pendientes cuando el cliente entrega $5.
+        factura.idFactura = "it-vuelto-saldo";
+        await vista.abrir({ idOrden: "o1" }, "cajero", "Ana");
+        const entrada = vista.root.querySelector("#monto");
+        const vuelto = vista.root.querySelector("#vuelto");
+        entrada.value = "5";
+        entrada.dispatchEvent(new Event("input"));
+        expect(vuelto.textContent).to.equal("Vuelto: $1.00");
+
+        // Al confirmar, la API ya tiene $1.25 pagados con tarjeta en otra caja.
+        vista.dao.actualizar.restore();
+        const enviarPago = sinon.spy();
+        simularApi({
+            "GET factura/it-vuelto-saldo": factura,
+            "GET factura/it-vuelto-saldo/totales": { total: 4, pagado: 1.25, saldo: 2.75 },
+            "GET pago": [{ idPago: "otro", estado: "CONFIRMADO", idFactura: { idFactura: factura.idFactura } }],
+            "GET pago/otro/detalle": [{ monto: 1.25, tipoPago: "TARJETA" }],
+            "POST pago": enviarPago
+        });
+        await vista.abonar();
+        expect(notificaciones.at(-1).mensaje).to.include("El saldo cambió");
+        sinon.assert.notCalled(enviarPago);
+        sinon.assert.notCalled(vista.descargar);
+
+        await vista.recargar(true);
+        expect(vista.root.querySelector(".saldo").textContent).to.equal("$2.75");
+        expect(entrada.value).to.equal("5");
+        expect(vuelto.textContent).to.equal("Vuelto: $2.25");
+        sinon.assert.notCalled(enviarPago);
+    });
+
+    test("rechaza el sobrepago con tarjeta antes de enviar y no descarga un ticket", async function () {
         await vista.abrir({ idOrden: "o1" }, "cajero", "Ana");
         const abonar = sinon.stub(vista.dao, "abonar");
+        vista.root.querySelector('input[value="TARJETA"]').click();
         vista.root.querySelector("#monto").value = "4.01";
         await vista.abonar();
         expect(notificaciones.at(-1)).to.include({ tipo: "aviso" });
         expect(notificaciones.at(-1).mensaje).to.include("no puede superar");
         sinon.assert.notCalled(abonar); sinon.assert.notCalled(vista.descargar);
+    });
+
+    test("actualiza el vuelto mientras se escribe y lo oculta al pagar exacto, editar o elegir tarjeta", async function () {
+        vista.dao.cargar.resolves({ ...datos, total: 2133, saldo: 2133 });
+        await vista.abrir({ idOrden: "o1" }, "cajero", "Ana");
+        const entrada = vista.root.querySelector("#monto"), vuelto = vista.root.querySelector("#vuelto");
+        for (const [monto, esperado] of [["25", "$3.67"], ["22", "$0.67"], ["21,33", ""], ["10", ""], ["22.001", ""], ["", ""]]) {
+            entrada.value = monto;
+            entrada.dispatchEvent(new Event("input"));
+            expect(vuelto.hidden).to.equal(!esperado);
+            expect(vuelto.textContent).to.equal(esperado ? "Vuelto: " + esperado : "");
+        }
+        entrada.value = "25";
+        vista.root.querySelector('input[value="TARJETA"]').click();
+        expect(vuelto.hidden).to.be.true;
+        expect(entrada.getAttribute("aria-invalid")).to.equal("true");
+        vista.root.querySelector('input[value="EFECTIVO"]').click();
+        expect(vuelto.hidden).to.be.false;
+        expect(vuelto.textContent).to.equal("Vuelto: $3.67");
+        expect(entrada.getAttribute("aria-invalid")).to.equal("false");
     });
 
     test("muestra campos de pago desde el inicio y factura internamente al primer abono", async function () {
@@ -168,8 +222,9 @@ suite("PagoModel: Integración", function () {
         expect(vista.root.querySelector(".factura").hidden).to.be.false;
     });
 
-    test("revalida el aporte escrito cuando la actualización automática reduce el saldo", async function () {
+    test("revalida el aporte con tarjeta cuando la actualización automática reduce el saldo", async function () {
         await vista.abrir({ idOrden: "o1" }, "cajero", "Ana");
+        vista.root.querySelector('input[value="TARJETA"]').click();
         vista.root.querySelector("#monto").value = "3";
         vista.dao.cargar.resolves({ ...datos, pagado: 200, saldo: 200 });
         await vista.recargar(true);

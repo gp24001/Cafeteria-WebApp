@@ -133,12 +133,14 @@ suite("OrdenModel: Integración", function () {
         const unidades = ["pan1", "pan2"].map(idOrdenProducto => ({ idOrdenProducto,
             idProducto: { idProducto: "panini" }, precio: 4, observaciones }));
         const originales = JSON.stringify(unidades);
+        const cambiar = sinon.stub(vista, "cambiar").resolves();
         vista.items.datos = { orden: { ...orden, estadoPreparacion: "EN_PREPARACION", unidades },
             lineas: [{ idProducto: "panini", nombre: "Panini de Pavo" }] };
         expect(vista.items.root.querySelector("strong").textContent).to.equal("Panini de Pavo x2");
         expect(vista.items.root.querySelector("small").textContent).to.equal("Leche Entera · Pan blanco · Sin Azucar");
         const cambio = sinon.spy(); vista.items.addEventListener("cambiar-item", cambio);
         vista.items.root.querySelector("button").click();
+        sinon.assert.calledOnce(cambiar);
         expect(cambio.firstCall.args[0].detail).to.deep.equal({ idOrdenProducto: ["pan1", "pan2"], listo: true });
         expect(JSON.stringify(unidades)).to.equal(originales);
     });

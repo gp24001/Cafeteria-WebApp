@@ -53,7 +53,7 @@ function documentoPDF(lineas) {
     return new Blob([new TextEncoder().encode(salida)], { type: "application/pdf" });
 }
 
-/** Genera el ticket pagado o la factura anulada confirmada, sin librerías ni servicios externos. */
+/** Genera el ticket pagado o la factura anulada confirmada*/
 export function generarTicket({ factura, orden, lineas, historial, total, pagado, saldo, cajero, caja }) {
     const anulada = esOrdenAnulada(factura);
     if (!anulada && (saldo !== 0 || pagado !== total)) throw new Error("El ticket se genera al completar el pago de la factura.");
@@ -80,9 +80,15 @@ export function generarTicket({ factura, orden, lineas, historial, total, pagado
         filas.push(`${precio} c/u`.padEnd(Math.max(1, 34 - importe.length)) + importe, "");
     }
     filas.push("----------------------------------", "TOTAL USD".padEnd(34 - dinero(total).length) + dinero(total), "", anulada ? "SIN COBROS REGISTRADOS" : "FORMA DE PAGO");
+    const agregarImporte = (etiqueta, monto) => {
+        const importe = dinero(monto);
+        filas.push(etiqueta.padEnd(34 - importe.length) + importe);
+    };
     for (const detalle of totalesPorMedio(historial)) {
-        const importe = dinero(detalle.monto);
-        filas.push(nombreMedioPago(detalle.tipoPago).padEnd(34 - importe.length) + importe);
+        if (detalle.vuelto && !anulada) {
+            agregarImporte("Efectivo recibido", detalle.monto + detalle.vuelto);
+            agregarImporte("Cambio", detalle.vuelto);
+        } else agregarImporte(nombreMedioPago(detalle.tipoPago), detalle.monto);
     }
     filas.push("----------------------------------", anulada ? "       ORDEN CANCELADA" : "           PAGO COMPLETO");
     if (!anulada) filas.push("      Gracias por tu compra.");

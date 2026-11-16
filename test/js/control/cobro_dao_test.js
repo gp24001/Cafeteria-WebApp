@@ -33,6 +33,32 @@ suite("CobroDao: Unidad", function () {
         expect([completo.total, completo.pagado, completo.saldo]).to.deep.equal([400, 400, 0]);
         expect(completo.historial.map(h => h.detalles[0].tipoPago)).to.deep.equal(["EFECTIVO", "TARJETA"]);
         expect(completo.historial[1].detalles[0].referenciaExterna).to.equal("comprobante-123");
+        expect(completo.historial[0].detalles[0]).not.to.have.property("observaciones");
+        expect(completo.historial[1].detalles[0]).not.to.have.property("observaciones");
+    });
+
+    test("el efectivo con vuelto liquida solo el saldo y conserva el monto entregado al releer el historial", async function () {
+        await dao.abonar(factura, "1.33", "TARJETA");
+        const liquidado = await dao.abonar(factura, "2.67", "EFECTIVO", "", 500);
+        expect([liquidado.total, liquidado.pagado, liquidado.saldo]).to.deep.equal([400, 400, 0]);
+        dao.detallesConfirmados.clear();
+        const historial = await dao.historial(factura.idFactura);
+        expect(historial[1].detalles[0]).to.deep.equal({ monto: 2.67, tipoPago: "EFECTIVO", observaciones: "Efectivo recibido (centavos): 500" });
+    });
+
+    test("si cambió el saldo desde el cálculo del vuelto, requiere revisar el pago antes de enviarlo", async function () {
+        await dao.abonar(factura, "1", "TARJETA");
+        const error = await dao.abonar(factura, "4", "EFECTIVO", "", 500).catch(e => e);
+        expect(error.message).to.include("saldo cambió");
+        sinon.assert.calledOnce(dao.pagos.crear);
+    });
+
+    test("el vuelto requiere efectivo recibido válido y mayor que el importe aplicado", async function () {
+        for (const recibido of [400, 399, 400.5, Infinity]) {
+            expect(await dao.abonar(factura, "4", "EFECTIVO", "", recibido).catch(e => e)).to.be.instanceOf(Error);
+        }
+        expect(await dao.abonar(factura, "4", "TARJETA", "", 500).catch(e => e)).to.be.instanceOf(Error);
+        sinon.assert.notCalled(dao.pagos.crear);
     });
 
     test("admite varios abonos del mismo medio sin sobrepasar el saldo", async function () {

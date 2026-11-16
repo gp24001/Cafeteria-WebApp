@@ -28,7 +28,7 @@ export default class CobroFactura extends HTMLElement {
         this.root.querySelector(".form-anulacion").onsubmit = evento => { evento.preventDefault(); this.anular(); };
         this.root.querySelector("dialog").addEventListener("cancel", evento => { if (this.ocupado) evento.preventDefault(); });
         this.form.onsubmit = evento => { evento.preventDefault(); this.abonar(); };
-        this.form.onchange = () => this.actualizarMedio();
+        this.form.onchange = evento => { if (evento.target.name === "medio") this.actualizarMedio(); };
         this.root.querySelector(".ticket").onclick = () => this.ticket();
     }
 
@@ -37,9 +37,14 @@ export default class CobroFactura extends HTMLElement {
 
     /** Explicita el método que se registrará y muestra la referencia solo para tarjeta. */
     actualizarMedio() {
-        this.root.querySelector(".referencia").hidden = this.medio !== "TARJETA";
+        const tarjeta = this.medio === "TARJETA";
+        this.root.querySelector(".referencia").hidden = !tarjeta;
+        actualizarTexto(this.root.querySelector('label[for="monto"]'), tarjeta ? "Importe del abono (USD)" : "Efectivo recibido (USD)");
+        actualizarTexto(this.root.querySelector("#ayuda-monto span"), tarjeta
+            ? "Registra el importe a aplicar, hasta el saldo pendiente. Puedes combinar abonos." : "Puedes combinar abonos.");
         this.root.querySelector(".abonar").textContent = this.datos?.total === 0 ? "Completar pago"
-            : (this.medio === "TARJETA" ? "Registrar aporte con tarjeta" : "Registrar aporte en efectivo");
+            : (tarjeta ? "Registrar aporte con tarjeta" : "Registrar aporte en efectivo");
+        this.validarAporte();
     }
 
     /** Invalida respuestas antiguas al cambiar de orden o retirar el Web Component. */
@@ -61,7 +66,6 @@ export default class CobroFactura extends HTMLElement {
         this.ticketAutomatico = null;
         this.anulada = false;
         this.root.querySelector("#monto").value = "";
-        this.validarAporte();
         this.root.querySelector("#referencia").value = "";
         this.root.querySelector('input[value="EFECTIVO"]').checked = true;
         this.actualizarMedio();
@@ -147,7 +151,6 @@ export default class CobroFactura extends HTMLElement {
         this.root.querySelector(".ticket").textContent = this.anulada ? "Descargar factura anulada PDF" : "Descargar ticket PDF";
         this.root.querySelector(".anular").hidden = this.anulada || datos.pagado > 0 || datos.incierto || Boolean(datos.factura && datos.saldo === 0);
         this.root.querySelector(".ayuda-anulacion").hidden = datos.pagado === 0;
-        this.validarAporte();
         this.dispatchEvent(new CustomEvent("factura-consultada", { detail: datos, bubbles: true, composed: true }));
     }
 
@@ -165,13 +168,20 @@ export default class CobroFactura extends HTMLElement {
     validarAporte(completo = false) {
         const entrada = this.root.querySelector("#monto");
         let mensaje = "";
+        let vuelto = 0;
         if (this.datos && !this.anulada && this.datos.total !== 0) {
             try {
                 const importe = centavos(entrada.value);
-                if (importe > this.datos.saldo) mensaje = "El aporte no puede superar el saldo pendiente de " + dinero(this.datos.saldo) + ".";
-                else if (completo && importe <= 0) mensaje = "El aporte debe ser mayor que cero.";
+                if (importe > this.datos.saldo) {
+                    if (this.medio === "EFECTIVO" && this.datos.saldo > 0) vuelto = importe - this.datos.saldo;
+                    else mensaje = "El aporte no puede superar el saldo pendiente de " + dinero(this.datos.saldo) + ".";
+                } else if (completo && importe <= 0) mensaje = "El aporte debe ser mayor que cero.";
             } catch { if (completo) mensaje = "Ingresa un importe válido con hasta dos decimales."; }
         }
+        const salida = this.root.querySelector("#vuelto");
+        salida.hidden = vuelto === 0;
+        actualizarTexto(salida, vuelto ? "Vuelto: " + dinero(vuelto) : "");
+        this.root.querySelector("#ayuda-monto span").hidden = vuelto > 0;
         const anterior = this.advertenciaMonto;
         this.advertenciaMonto = mensaje;
         entrada.setAttribute("aria-invalid", String(Boolean(mensaje)));
@@ -192,9 +202,12 @@ export default class CobroFactura extends HTMLElement {
             const monto = this.root.querySelector("#monto").value;
             const medio = this.medio;
             const referencia = medio === "TARJETA" ? this.root.querySelector("#referencia").value : "";
+            const saldo = this.datos.saldo;
+            const recibido = medio === "EFECTIVO" && saldo > 0 ? centavos(monto) : 0;
             await this.operar(async () => {
                 if (!this.datos.factura) this.datos = await this.dao.emitir(this.orden, this.datos.cajas[0].idCaja, this.responsable);
                 if (this.datos.total === 0) return this.datos;
+                if (recibido > saldo) return this.dao.abonar(this.datos.factura, saldo / 100, medio, "", recibido);
                 return this.dao.abonar(this.datos.factura, monto, medio, referencia);
             });
         } catch (error) { notificar(this, error.mensaje || error.message, "error"); }

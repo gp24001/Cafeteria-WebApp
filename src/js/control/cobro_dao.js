@@ -5,7 +5,7 @@ import PagoDetalleDao from "./pago_detalle_dao.js";
 import CajaDao from "./caja_dao.js";
 import RecepcionOrdenDao from "./recepcion_orden_dao.js";
 import { leerPreparacion } from "./preparacion_estado.js";
-import { centavos } from "./importes.js";
+import { centavos, observacionEfectivo } from "./importes.js";
 
 /** Coordina facturas y abonos con los recursos REST originales, sin alterar el backend. */
 export default class CobroDao {
@@ -163,29 +163,36 @@ export default class CobroDao {
     /**
      * Registra un abono validado en centavos; una respuesta incierta nunca se reenvía automáticamente.
      * @param {object} factura Factura vigente cuyo saldo vuelve a consultar la API antes de cobrar.
-     * @param {string|number} monto Importe decimal introducido, sin exponentes ni más de dos decimales.
+     * @param {string|number} monto Importe decimal aplicado a la factura.
      * @param {string} tipoPago EFECTIVO o TARJETA.
      * @param {string} referencia Comprobante opcional del aporte.
+     * @param {number} [recibido] Efectivo recibido en centavos cuando se devuelve vuelto.
      * @returns {Promise<object>} Estado confirmado o reconciliado con importes en centavos e historial completo.
      * @throws {Error|object} Validación, operación simultánea, saldo insuficiente o respuesta aún sin confirmar.
      */
-    async abonar(factura, monto, tipoPago, referencia = "") {
+    async abonar(factura, monto, tipoPago, referencia = "", recibido) {
         if (this.ocupado) throw new Error("Espera a que termine la operación actual.");
         const importe = centavos(monto);
         if (importe <= 0) throw new Error("El abono debe ser mayor que cero.");
         if (!["EFECTIVO", "TARJETA"].includes(tipoPago)) throw new Error("Selecciona efectivo o tarjeta.");
+        if (recibido !== undefined && (tipoPago !== "EFECTIVO" || !Number.isSafeInteger(recibido) || recibido <= importe)) {
+            throw new Error("El efectivo recibido debe superar el importe aplicado para dar vuelto.");
+        }
         if (referencia.length > 200) throw new Error("La referencia no puede superar 200 caracteres.");
         this.ocupado = true;
         const clave = "cafefe.cobro." + factura.idFactura;
         try {
             const actual = await this.estado(factura);
             if (actual.incierto || actual.abonoConfirmado) throw new Error("Hay un abono sin confirmar en esta pantalla. Revisa los pagos antes de intentar otro cobro.");
+            if (recibido !== undefined && importe !== actual.saldo) throw new Error("El saldo cambió. Revisa el vuelto antes de confirmar el pago.");
             if (importe > actual.saldo) throw new Error("El abono no puede superar el saldo pendiente.");
+            const detalle = { monto: importe / 100, tipoPago };
+            if (referencia.trim()) detalle.referenciaExterna = referencia.trim();
+            if (recibido !== undefined) detalle.observaciones = observacionEfectivo(recibido);
             const marca = "Abono web " + crypto.randomUUID();
             this.almacen.setItem(clave, marca);
             try {
-                await this.pagos.crear({ idFactura: factura.idFactura, observaciones: marca,
-                    detalles: [{ monto: importe / 100, tipoPago, ...(referencia.trim() ? { referenciaExterna: referencia.trim() } : {}) }] });
+                await this.pagos.crear({ idFactura: factura.idFactura, observaciones: marca, detalles: [detalle] });
             } catch (error) {
                 if (error.error?.status >= 400 && error.error.status < 500) {
                     this.almacen.removeItem(clave);
