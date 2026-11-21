@@ -22,9 +22,10 @@ function desdeJson(Tipo, datos) {
 /** Comparte consultas REST, paginación y conversión de entidades entre los DAO específicos. */
 class DefaultDao {
     /** Recibe el tipo de entidad y establece la dirección base de la API existente. */
-    constructor(Entidad = Object) {
+
+        constructor(Entidad = Object) { // cambio para concidir con la imagen del backend
         this.Entidad = Entidad;
-        this._BASE_URL = "http://localhost:9080/cafefe-1.0-SNAPSHOT/resources/v1/";
+        this._BASE_URL = "http://cafefe.backend:9080/cafefe/resources/v1/";
         this.URL = this._BASE_URL;
     }
     /**

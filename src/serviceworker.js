@@ -1,6 +1,6 @@
 // Subir v1 a v2, v3, etc. cuando cambie cualquier archivo de urlsToCache.
 // Cada versión conserva una copia completa de los recursos estáticos de la interfaz.
-const CACHE_NAME = "cafefe.app.cache.v3";
+const CACHE_NAME = "cafefe.app.cache.v4";
 const CACHE_PREFIX = `${self.registration.scope}::cafefe.app.cache.`;
 const CACHE_KEY = `${self.registration.scope}::${CACHE_NAME}`;
 
